@@ -250,6 +250,66 @@ module.exports = function leafletImage(map, callback) {
         };
     }
 
+    function handlePopupLayer(popup, callback) {
+
+        let canvas = document.createElement('canvas');
+        let ctx = canvas.getContext('2d');
+
+        // If thie canvasContext class doesn't have  a fillRoundedRect, extend it now
+        if (!ctx.constructor.prototype.fillRoundedRect) {
+
+            ctx.constructor.prototype.fillRoundedRect =
+                function (xx, yy, ww, hh, rad, fill, stroke) {
+                    if (typeof (rad) == "undefined") rad = 5;
+                    this.beginPath();
+                    this.moveTo(xx + rad, yy);
+                    this.arcTo(xx + ww, yy, xx + ww, yy + hh, rad);
+                    this.arcTo(xx + ww, yy + hh, xx, yy + hh, rad);
+                    this.arcTo(xx, yy + hh, xx, yy, rad);
+                    this.arcTo(xx, yy, xx + ww, yy, rad);
+                    if (stroke) this.stroke();  // Default to no stroke
+                    if (fill || typeof (fill) == "undefined") this.fill();  // Default to fill
+                };
+        }
+
+        canvas.width = dimensions.x;
+        canvas.height = dimensions.y;
+        ctx.globalAlpha = 0.5;
+        ctx.font = 'bold 84px Helvetica Neue';
+
+
+        let pixelBounds = map.getPixelBounds();
+        let minPoint = new L.Point(pixelBounds.min.x, pixelBounds.min.y);
+        let pixelPoint = map.project(popup.getLatLng());
+        let pos = pixelPoint.subtract(minPoint);
+
+        let markerSize = [120, 120];
+        let textSize = [ctx.measureText(popup._content).width, ctx.measureText(popup._content).emHeightAscent];
+        let borderSize = [textSize[0] + (150 * 2), textSize[1] + (100 * 2)];
+
+        let markerX = Math.round(pos.x - markerSize[0] / 2);
+        let markerY = Math.round(pos.y - markerSize[1] / 2);
+        let borderX = markerX - borderSize[0] / 2 + markerSize[0] / 2;
+        let borderY = markerY - borderSize[1] - markerSize[1] / 2;
+        let textX = borderX + borderSize[0] / 2 - textSize[0] / 2;
+        let textY = borderY + borderSize[1] / 2 + textSize[1] / 2;
+
+        // ctx.fillStyle = "rgb(0,0,255)";
+        // ctx.fillRect(markerX,markerY,markerSize[0],markerSize[1]);
+        ctx.fillStyle = "rgb(0,0,0)";
+        ctx.fillRoundedRect(borderX, borderY, borderSize[0], borderSize[1], 100);
+        // ctx.fillStyle = "rgb(0,255,0)";
+        // ctx.fillRect(textX,textY-textSize[1], textSize[0], textSize[1]);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = "rgb(255,255,255)";
+        ctx.font = 'bold 84px Helvetica Neue';
+        ctx.fillText(popup._content, textX, textY);
+
+        callback(null, {
+            canvas: canvas
+        });
+    }
+
     function addCacheString(url) {
         // workaround for https://github.com/mapbox/leaflet-image/issues/84
         if (!url) return url;
