@@ -30,7 +30,7 @@ module.exports = function leafletImage(map, callback) {
     // tiles, paths, and then markers
     map.eachLayer(drawTileLayer);
     map.eachLayer(drawEsriDynamicLayer);
-    
+
     if (map._pathRoot) {
         layerQueue.defer(handlePathRoot, map._pathRoot);
     } else if (map._panes) {
@@ -38,6 +38,7 @@ module.exports = function leafletImage(map, callback) {
         if (firstCanvas) { layerQueue.defer(handlePathRoot, firstCanvas); }
     }
     map.eachLayer(drawMarkerLayer);
+    map.eachLayer(drawPopupLayer);
     layerQueue.awaitAll(layersDone);
 
     function drawTileLayer(l) {
@@ -50,11 +51,15 @@ module.exports = function leafletImage(map, callback) {
             layerQueue.defer(handleMarkerLayer, l);
         }
     }
-    
+
+    function drawPopupLayer(l) {
+        if (l instanceof L.Popup) layerQueue.defer(handlePopupLayer, l);
+    }
+
     function drawEsriDynamicLayer(l) {
         if (!L.esri) return;
-       
-        if (l instanceof L.esri.DynamicMapLayer) {                       
+
+        if (l instanceof L.esri.DynamicMapLayer) {
             layerQueue.defer(handleEsriDymamicLayer, l);
         }
     }
@@ -85,7 +90,7 @@ module.exports = function leafletImage(map, callback) {
             bounds = map.getPixelBounds(),
             zoom = map.getZoom(),
             tileSize = layer.options.tileSize;
-            
+
         ctx.globalAlpha = (layer.options && layer.options.opacity) ? layer.options.opacity : 1;
 
         if (zoom > layer.options.maxZoom ||
@@ -191,7 +196,7 @@ module.exports = function leafletImage(map, callback) {
             callback(null, {
                 canvas: canvas
             });
-        } catch(e) {
+        } catch (e) {
             console.error('Element could not be drawn on canvas', root); // eslint-disable-line no-console
         }
     }
@@ -229,25 +234,6 @@ module.exports = function leafletImage(map, callback) {
         im.src = url;
 
         if (isBase64) im.onload();
-    }
-    
-    function handleEsriDymamicLayer(dynamicLayer, callback) {
-        var canvas = document.createElement('canvas');
-        canvas.width = dimensions.x;
-        canvas.height = dimensions.y;
-    
-        var ctx = canvas.getContext('2d');
-    
-        var im = new Image();
-        im.crossOrigin = '';
-        im.src = addCacheString(dynamicLayer._currentImage._image.src);
-    
-        im.onload = function() {
-            ctx.drawImage(im, 0, 0);
-            callback(null, {
-                canvas: canvas
-            });
-        };
     }
 
     function handlePopupLayer(popup, callback) {
@@ -294,6 +280,8 @@ module.exports = function leafletImage(map, callback) {
         let textX = borderX + borderSize[0] / 2 - textSize[0] / 2;
         let textY = borderY + borderSize[1] / 2 + textSize[1] / 2;
 
+
+
         // ctx.fillStyle = "rgb(0,0,255)";
         // ctx.fillRect(markerX,markerY,markerSize[0],markerSize[1]);
         ctx.fillStyle = "rgb(0,0,0)";
@@ -308,6 +296,26 @@ module.exports = function leafletImage(map, callback) {
         callback(null, {
             canvas: canvas
         });
+    }
+
+
+    function handleEsriDymamicLayer(dynamicLayer, callback) {
+        var canvas = document.createElement('canvas');
+        canvas.width = dimensions.x;
+        canvas.height = dimensions.y;
+
+        var ctx = canvas.getContext('2d');
+
+        var im = new Image();
+        im.crossOrigin = '';
+        im.src = addCacheString(dynamicLayer._currentImage._image.src);
+
+        im.onload = function () {
+            ctx.drawImage(im, 0, 0);
+            callback(null, {
+                canvas: canvas
+            });
+        };
     }
 
     function addCacheString(url) {
