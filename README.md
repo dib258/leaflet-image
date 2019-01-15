@@ -31,7 +31,7 @@ __For Leaflet >= 1.0.0__: You must set `renderer: L.canvas()` for any layer that
 
 browserify
 
-    npm install --save leaflet-image
+    npm install --save leaflet-image-with-opacity
 
 web
 
