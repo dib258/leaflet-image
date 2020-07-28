@@ -1,6 +1,6 @@
 {
   "name": "leaflet-image-with-opacity",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "export leaflet maps as images",
   "main": "index.js",
   "scripts": {

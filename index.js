@@ -260,6 +260,8 @@ module.exports = function leafletImage(map, callback) {
         canvas.width = dimensions.x;
         canvas.height = dimensions.y;
 
+        ctx.font = 'bold 84px Helvetica Neue'; // Set Font here because of let textSize
+
         let pixelBounds = map.getPixelBounds();
         let minPoint = new L.Point(pixelBounds.min.x, pixelBounds.min.y);
         let pixelPoint = map.project(popup.getLatLng());
@@ -268,7 +270,6 @@ module.exports = function leafletImage(map, callback) {
         let markerSize = [120, 120];
         let textSize = [ctx.measureText(popup._content).width, ctx.measureText(popup._content).emHeightAscent];
         let borderSize = [textSize[0] + 150, textSize[1] + 100];
-
         let markerX = Math.round(pos.x - markerSize[0] / 2);
         let markerY = Math.round(pos.y - markerSize[1] / 2);
         let borderX = markerX - borderSize[0] / 2 + markerSize[0] / 2;
@@ -276,14 +277,11 @@ module.exports = function leafletImage(map, callback) {
         let textX = borderX + borderSize[0] / 2 - textSize[0] / 2;
         let textY = borderY + borderSize[1] / 2 + textSize[1] / 2;
 
-
         ctx.globalAlpha = 0.7;
-        ctx.font = 'bold 84px Helvetica Neue';
         ctx.fillStyle = "rgb(255,255,255)";
         ctx.fillRoundedRect(borderX, borderY, borderSize[0], borderSize[1], 100);
         ctx.globalAlpha = 1;
         ctx.fillStyle = "rgb(0,0,0)";
-        ctx.font = 'bold 84px Helvetica Neue';
         ctx.fillText(popup._content, textX, textY);
 
 
