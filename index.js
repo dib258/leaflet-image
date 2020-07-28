@@ -237,7 +237,6 @@ module.exports = function leafletImage(map, callback) {
     }
 
     function handlePopupLayer(popup, callback) {
-
         let canvas = document.createElement('canvas');
         let ctx = canvas.getContext('2d');
 
@@ -260,9 +259,6 @@ module.exports = function leafletImage(map, callback) {
 
         canvas.width = dimensions.x;
         canvas.height = dimensions.y;
-        ctx.globalAlpha = 0.5;
-        ctx.font = 'bold 84px Helvetica Neue';
-
 
         let pixelBounds = map.getPixelBounds();
         let minPoint = new L.Point(pixelBounds.min.x, pixelBounds.min.y);
@@ -271,7 +267,7 @@ module.exports = function leafletImage(map, callback) {
 
         let markerSize = [120, 120];
         let textSize = [ctx.measureText(popup._content).width, ctx.measureText(popup._content).emHeightAscent];
-        let borderSize = [textSize[0] + (150 * 2), textSize[1] + (100 * 2)];
+        let borderSize = [textSize[0] + 150, textSize[1] + 100];
 
         let markerX = Math.round(pos.x - markerSize[0] / 2);
         let markerY = Math.round(pos.y - markerSize[1] / 2);
@@ -281,17 +277,15 @@ module.exports = function leafletImage(map, callback) {
         let textY = borderY + borderSize[1] / 2 + textSize[1] / 2;
 
 
-
-        // ctx.fillStyle = "rgb(0,0,255)";
-        // ctx.fillRect(markerX,markerY,markerSize[0],markerSize[1]);
-        ctx.fillStyle = "rgb(0,0,0)";
-        ctx.fillRoundedRect(borderX, borderY, borderSize[0], borderSize[1], 100);
-        // ctx.fillStyle = "rgb(0,255,0)";
-        // ctx.fillRect(textX,textY-textSize[1], textSize[0], textSize[1]);
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = 0.7;
+        ctx.font = 'bold 84px Helvetica Neue';
         ctx.fillStyle = "rgb(255,255,255)";
+        ctx.fillRoundedRect(borderX, borderY, borderSize[0], borderSize[1], 100);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = "rgb(0,0,0)";
         ctx.font = 'bold 84px Helvetica Neue';
         ctx.fillText(popup._content, textX, textY);
+
 
         callback(null, {
             canvas: canvas
